@@ -1,0 +1,21 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: rgb(187, 249, 249);
+    height: 100px;
+    width: 100%;
+}
+
+nav a {
+    color:rgb(63, 117, 117);
+    font-size: 30px;
+    text-decoration: none;
+    font-weight: bold;
+}
