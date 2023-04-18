@@ -1,4 +1,12 @@
-section 
-    - for time_content in time_contents do 
-        p #{time_content["time_content"]}
+
+section#time_table_home
+    - for court_content in court_contents do 
+        p #{court_content["court_name"]}
+
+        table 
     
+            - for time_content in time_contents do 
+                tr
+                    td 
+                        a href="/book" #{time_content["time_content"]}
+        
