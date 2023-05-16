@@ -3,12 +3,14 @@ require 'slim'
 require 'sqlite3'
 require 'bcrypt'
 require 'sinatra/reloader'
+require 'sinatra/flash'
+
+enable :sessions
 
 get('/') do
 
     db = SQLite3::Database.new("db/matcho.db")
     db.results_as_hash = true
-    id = params[:id].to_i
     indextable_1 = db.execute("SELECT time_content FROM Time WHERE court_id = 1")
     indextable_2 = db.execute("SELECT court_name FROM Court WHERE court_id = 1")
 
@@ -17,42 +19,82 @@ get('/') do
 end
 
 
-get('/book/:id') do
+get('/book') do
     
+  db = SQLite3::Database.new("db/matcho.db")
+    db.results_as_hash = true
+    indextable_1 = db.execute("SELECT time_content FROM Time WHERE court_id = 1")
+    indextable_2 = db.execute("SELECT court_name FROM Court WHERE court_id = 1")
+    id_time = db.execute("SELECT time_id FROM Time WHERE court_id = 1")
+    slim(:"book/start",locals:{time_contents:indextable_1, court_contents:indextable_2, id_time:id_time})
+end
+
+get('/book/:id') do
+  id = params[:id].to_i
+  db = SQLite3::Database.new("db/matcho.db")
+  court_id = db.execute("SELECT court_id FROM Time WHERE time_id = ?", id).first.first
+  db.results_as_hash = true
+  indextable_1 = db.execute("SELECT time_content FROM Time WHERE court_id = 1")
+  indextable_2 = db.execute("SELECT court_name FROM Court WHERE court_id = 1")
+ 
+ 
+  result = db.execute("SELECT user_id FROM Court_user_relation WHERE time_id = ?", id)
+ if result.length != 0
+  user_relation = result.first['user_id']
+  booked = db.execute("SELECT username FROM User WHERE user_id = ?", user_relation).first['username']
+ end
+  slim(:"book/show",locals:{time_contents:indextable_1, court_contents:indextable_2, time_id:id, court_id:court_id, booked:booked})
+end
+
+post('/book') do
+  username = session[:username]
+  db = SQLite3::Database.new("db/Matcho.db")
+  db.results_as_hash = true
+  user_id = db.execute("SELECT user_id FROM User WHERE username=?", username).first['user_id']
+  court_id = params["court_id"]
+  time_id = params["time_id"]
+  db.execute("INSERT INTO Court_user_relation(court_id, user_id, time_id) VALUES (?,?,?)", court_id, user_id, time_id)
+  redirect("/book/#{time_id}")
+end
+
+post('/unbook') do
+  time_id = params["time_id"]
+  db = SQLite3::Database.new("db/Matcho.db")
+  db.results_as_hash = true
+  db.execute("DELETE FROM Court_user_relation WHERE time_id = ?", time_id)
+  redirect("/book/#{time_id}")
+end
+
+
+get('/register') do 
+    slim(:"register")
 
 end
 
-get('/sign_up') do
-    slim(:sign_up)
-
-end
-
-post('/sign_up') do
+post('/register') do
     username = params[:username]
     password = params[:password]
     password_confirm = params[:password_confirm]
   
-    db = SQLite3::Database.new("db/data.db")
+    db = SQLite3::Database.new("db/Matcho.db")
     db.results_as_hash = true
     result = db.execute("SELECT user_id FROM User WHERE username=?", username)
      
     if result.empty?
         if password == password_confirm
-          password_digest = BCrypt::Password.create(password)
-          p password_digest
-          db.execute("INSERT INTO User(username, password_digest) VALUES (?,?)", [username, password_digest])
+          pwdigest = BCrypt::Password.create(password)
+          db.execute("INSERT INTO User(username, pwdigest) VALUES (?,?)", [username, pwdigest])
          
-        flash[:notice] = "Registration done succesfully"
-        redirect('/')
+        p = "Registration succesful"
+        redirect('/login')
         else
-          flash[:warning] = "Passwords do not match"
-  
-          redirect('/sign_up')
+          p = "Passwords do not match"
+          redirect('/register')
         end
     else
-      flash[:warning] = "This username already exists. Your username must be unique"
+      p = "This username already exists. Your username must be unique"
   
-      redirect('/sign_up')
+      redirect('/register')
     end
   end
   
@@ -64,26 +106,32 @@ post('/sign_up') do
     username = params[:username]
     password = params[:password]
   
-    db = SQLite3::Database.new("db/data.db")
+    db = SQLite3::Database.new("db/matcho.db")
     db.results_as_hash = true
-    result = db.execute("SELECT user_id, password_digest FROM User WHERE username=?", [username])
+    result = db.execute("SELECT user_id, pwdigest FROM User WHERE username=?", [username])
   
     if result.empty?
-      session[:alert] = "Invalid credentials"
+      p "invalid credentials"
       redirect('/login')
     end
   
     user_id = result.first["user_id"]
-    password_digest = result.first["password_digest"]
-    if BCrypt::Password.new(password_digest) == password
+    pwdigest = result.first["pwdigest"]
+    if BCrypt::Password.new(pwdigest) == password
         session[:user_id] = user_id
         session[:username] = username
   
-        session[:alert] = "Login succesful"
+        p "login succesful"
   
         redirect('/')
     else
-      session[:alert] = "Invalid credentials"
+      p "invalid credentials"
       redirect('/login')
     end
+  end
+
+  post('/logout') do
+    session[:user_id] = nil
+    session[:username] = nil
+    redirect('/')
   end

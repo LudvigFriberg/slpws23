@@ -1,13 +1,12 @@
-
 section#time_table_home
     - for court_content in court_contents do 
         p #{court_content["court_name"]}
 
         table 
     
-            - for time_content in time_contents do 
+            - for id in id_time do 
                 tr
                     td 
-                        a href="/book" #{time_content["time_content"]}
-p ="home"
+                        a href="/book/#{id["time_id"]}" #{time_contents[id["time_id"] - 1]["time_content"]}
 
+p ="book"

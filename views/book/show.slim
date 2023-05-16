@@ -1,0 +1,13 @@
+h2 Book
+form action='/book' method='post'
+    input type="submit" name="book" value="book"
+    input type="number" name="time_id" value="#{time_id}" hidden="true"
+    input type="number" name="court_id" value="#{court_id}" hidden="true"
+
+p ="This time is booked by: #{booked}"
+
+
+form action='/unbook' method='post'
+    input name="username" id="username" hidden="true"
+    input type="number" name="time_id" value="#{time_id}" hidden="true"
+    input type="submit" name="unbook" value="unbook"

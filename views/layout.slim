@@ -12,5 +12,8 @@ html lang="en"
             a href="/book" Book
             a href="/login" Log in
             a href="/register" Register
+            form action='/logout' method='post'
+                input type="submit" name="logout" value="logout"
     
+    p = "logged in as #{session[:username]}"
     ==yield

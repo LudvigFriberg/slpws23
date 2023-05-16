@@ -21,7 +21,6 @@ nav a {
 }
 
 #time_table_home {
-    height: 200px;
     width: 200px;
     background-color: rgb(187, 249, 249);
     display: flex;
@@ -38,8 +37,30 @@ nav a {
     width: 200px;
     height: 30px;
     border: 1px rgb(63, 117, 117) solid;
+    margin-top: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+}
+
+
+#time_table_book {
+    width: 200px;
+    background-color: rgb(187, 249, 249);
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: column;
+    border: 3px rgb(63, 117, 117) solid;
+}
+
+#time_table_book table tr td {
+    width: 200px;
+    height: 30px;
+    border: 1px rgb(63, 117, 117) solid;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
